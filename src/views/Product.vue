@@ -27,59 +27,48 @@
                   <img class="product-big-img" :src="selected_pic" />
                 </div>
                 <div class="product-thumbs">
-                  <carousel class="product-thumbs-track ps-slider" :margin="10" :autoplay="true" :items="3" :nav="false" :dots="false">                   
-                    <div class="pt" @click="set_active_img(pic[0])" :class="pic[0]==selected_pic ? 'active' : ''">
-                      <img src="img/mickey1.jpg" alt="" />
-                    </div>
-
-                    <div class="pt"  @click="set_active_img(pic[1])" :class="pic[1]==selected_pic ? 'active' : ''">
-                      <img src="img/mickey2.jpg" alt="" />
-                    </div>
-
-                    <div class="pt"  @click="set_active_img(pic[2])" :class="pic[2]==selected_pic ? 'active' : ''">
-                      <img src="img/mickey3.jpg" alt="" />
-                    </div>
-
-                    <div class="pt"  @click="set_active_img(pic[3])" :class="pic[3]==selected_pic ? 'active' : ''">
-                      <img src="img/mickey4.jpg" alt="" />
-                    </div>
-                  </carousel>
+                  <!-- Carousel  -->
+                  <div v-if="pics.length > 0">
+                    <carousel
+                      class="product-thumbs-track ps-slider"
+                      :margin="10"
+                      :autoplay="true"
+                      :items="3"
+                      :nav="false"
+                      :dots="false"
+                    >
+                      <!-- Looping Gambar Produk -->
+                      <div
+                        v-for="(pic, index) in pics"
+                        :key="pic"
+                        class="pt"
+                        @click="set_active_img(pics[index])"
+                        :class="pics[index] == selected_pic ? 'active' : ''"
+                      >
+                        <img :src="pic" />
+                      </div>
+                    </carousel>
+                  </div>
                 </div>
               </div>
               <div class="col-lg-8">
                 <div class="product-details text-left">
                   <div class="pd-title">
-                    <span>oranges</span>
-                    <h3>Pure Pineapple</h3>
+                    <span>{{ productDetails.type }}</span>
+                    <h3>{{ productDetails.name }}</h3>
                   </div>
                   <div class="pd-desc">
-                    <p>
-                      Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                      Corporis, error officia. Rem aperiam laborum voluptatum
-                      vel, pariatur modi hic provident eum iure natus quos non a
-                      sequi, id accusantium! Autem.
-                    </p>
-                    <p>
-                      Lorem ipsum dolor sit, amet consectetur adipisicing elit.
-                      Quam possimus quisquam animi, commodi, nihil voluptate
-                      nostrum neque architecto illo officiis doloremque et
-                      corrupti cupiditate voluptatibus error illum. Commodi
-                      expedita animi nulla aspernatur. Id asperiores blanditiis,
-                      omnis repudiandae iste inventore cum, quam sint molestiae
-                      accusamus voluptates ex tempora illum sit perspiciatis.
-                      Nostrum dolor tenetur amet, illo natus magni veniam quia
-                      sit nihil dolores. Commodi ratione distinctio harum
-                      voluptatum velit facilis voluptas animi non laudantium, id
-                      dolorem atque perferendis enim ducimus? A exercitationem
-                      recusandae aliquam quod. Itaque inventore obcaecati, unde
-                      quam impedit praesentium veritatis quis beatae ea atque
-                      perferendis voluptates velit architecto?
-                    </p>
-                    <h4>$495.00</h4>
+                    <p v-html="productDetails.description"></p>
+                    <h4>Rp {{ productDetails.price }}</h4>
                   </div>
                   <div class="quantity">
-                    <router-link to="/cart" class="primary-btn pd-cart"
-                      >Add To Cart</router-link>
+                    <div to="/cart">
+                      <a  @click="addItemToKeranjang(
+                        productDetails.id,
+                        productDetails.name,
+                        productDetails.price,
+                        productDetails.galleries[0].photo)" class="primary-btn pd-cart">Add To Cart</a>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -89,8 +78,8 @@
       </div>
     </section>
     <!-- Product Shop Section End -->
-    
-    <RelatedSection/>
+
+    <RelatedSection />
 
     <FooterSection />
   </div>
@@ -104,7 +93,7 @@ import FooterSection from "@/components/FooterSection.vue";
 import RelatedSection from "@/components/RelatedSection.vue";
 import carousel from "vue-owl-carousel";
 // import ZoomOnHover from "vue-zoom-on-hover";
-
+import axios from "axios";
 
 export default {
   name: "Product",
@@ -116,50 +105,92 @@ export default {
     // ZoomOnHover
   },
   data() {
-      return {
-          selected_pic: "img/mickey1.jpg",
-          pic: [
-              "img/mickey1.jpg",
-              "img/mickey2.jpg",
-              "img/mickey3.jpg",
-              "img/mickey4.jpg"
-          ]
-    }
+    return {
+      selected_pic: "",
+      productDetails: [],
+      pics: [],
+      // keranjang: [],
+    };
   },
-  
+
   methods: {
-      set_active_img: function(url) {
-          this.selected_pic = url
+    set_active_img: function (url) {
+      this.selected_pic = url;
+    },
+    // Mengelola data hasil dari API
+    product: function (data) {
+      this.productDetails = data; // Berisi Objek Produk details
+      this.selected_pic = data.galleries[0].photo; // Gambar dengan ID 0 akan di set sebagai default image
+      for (let i = 0; i < data.galleries.length; i++) {
+        // Mengambil URL image produk
+        this.pics.push(data.galleries[i].photo);
       }
-  }
+    },
+
+    // Add Item to Keranjang
+    addItemToKeranjang: function(productId, productName, productPrice, productImage) {
+
+      var item = {
+        "id" : productId,
+        "name": productName,
+        "price": productPrice,
+        "image": productImage
+
+      };
+
+      // Menambahkan item ke global array keranjang
+      this.$store.state.keranjang.push(item);
+      const parsed = JSON.stringify(this.$store.state.keranjang);
+      localStorage.setItem('keranjang', parsed);
+      
+    },
+  },
+
+  mounted() {
+    // Load Keranjang Array
+    if (localStorage.getItem("keranjang")) {
+      try {
+        // this.$store.state.keranjang = JSON.parse(localStorage.getItem("keranjang"));
+        this.$store.commit('loadProductToKeranjang', JSON.parse(localStorage.getItem("keranjang")))
+      } catch (e) {
+        localStorage.removeItem("keranjang");
+      }
+    }
   
-}
+    // Get Product by its id
+    axios(this.$api_url+"/products", {
+      params: {
+        id: this.$route.params.id,
+      },
+    })
+      .then((res) => this.product(res.data.data))
+      .catch((error) => console.log(error));
+
+  },
+
+  computed: {},
+};
 </script>
 
 <style scoped>
-
 .product-shop {
-    margin-left: 14%;
-    margin-right: 14%;
-}
-
-.product-thumbs {
-
+  margin-left: 14%;
+  margin-right: 14%;
 }
 
 .product-pic-zoom {
-    height: 410px;
-    /* width: 400px */
-    object-fit: cover;
-    overflow: hidden;
-
+  margin-bottom: -94px;
+  height: 410px;
+  /* width: 400px */
+  object-fit: cover;
+  overflow: hidden;
 }
 
 .product-pic-zoom img {
-    max-width: 100%;
-    max-height: 100%;
-    overflow:hidden;
-    border-radius: 3px;
+  max-width: 100%;
+  max-height: 75%;
+  overflow: hidden;
+  border-radius: 3px
 }
 
 </style>

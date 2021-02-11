@@ -33,30 +33,28 @@
                         <th>Action</th>
                       </tr>
                     </thead>
-                    <tbody>
-                      <tr>
+                    <tbody v-if="this.$store.state.keranjang.length > 0">
+                      <tr v-for="item in this.$store.state.keranjang" :key="item.dd">
                         <td class="cart-pic first-row">
-                          <img src="img/cart-page/product-1.jpg" />
+                          <img :src="item.image" />
                         </td>
-                        <td class="cart-title first-row text-center">
-                          <h5>Pure Pineapple</h5>
+                        <td class="cart-title first-row">
+                          <center><h5 style="word-wrap: break-word; width: 210px;">{{ item.name }}</h5></center>
                         </td>
-                        <td class="p-price first-row">$60.00</td>
+                        <td class="p-price first-row">{{ item.price | currency('Rp',2, { thousandsSeparator: '.' , decimalSeparator: ',' }) }}</td>
                         <td class="delete-item">
-                          <a href="#"><i class="material-icons"> close </i></a>
+                          <div
+                            class="si-close"
+                            @click="deleteItemKeranjang(item)"
+                          >
+                            <i class="ti-close"></i>
+                          </div>
                         </td>
                       </tr>
+                    </tbody>
+                    <tbody v-else>
                       <tr>
-                        <td class="cart-pic first-row">
-                          <img src="img/cart-page/product-1.jpg" />
-                        </td>
-                        <td class="cart-title first-row text-center">
-                          <h5>Pure Pineapple</h5>
-                        </td>
-                        <td class="p-price first-row">$60.00</td>
-                        <td class="delete-item">
-                          <a href="#"><i class="material-icons"> close </i></a>
-                        </td>
+                        <td class="">Belum ada barang yang di pesan nih!</td>
                       </tr>
                     </tbody>
                   </table>
@@ -115,24 +113,30 @@
                 <div class="proceed-checkout text-left">
                   <ul>
                     <li class="subtotal">
-                      ID Transaction <span>#SH12000</span>
-                    </li>
-                    <li class="subtotal mt-3">Subtotal <span>$240.00</span></li>
-                    <li class="subtotal mt-3">Pajak <span>10%</span></li>
-                    <li class="subtotal mt-3">
-                      Total Biaya <span>$440.00</span>
+                      ID Transaction <span>#{{ transactionId }}</span>
                     </li>
                     <li class="subtotal mt-3">
-                      Bank Transfer <span>Mandiri</span>
+                      Subtotal <span>{{ this.$store.state.subtotal | currency('rp',2, { thousandsSeparator: '.' , decimalSeparator: ',' }) }}</span>
                     </li>
                     <li class="subtotal mt-3">
-                      No. Rekening <span>2208 1996 1403</span>
+                      Pajak <span>{{ pajak }}%</span>
                     </li>
                     <li class="subtotal mt-3">
-                      Nama Penerima <span>Shayna</span>
+                      Total Biaya <span>{{ this.$store.state.totalBiaya | currency('rp',2, { thousandsSeparator: '.' , decimalSeparator: ',' }) }}</span>
+                    </li>
+                    <li class="subtotal mt-3">
+                      Bank Transfer <span>{{ bank.nama }}</span>
+                    </li>
+                    <li class="subtotal mt-3">
+                      No. Rekening <span>{{ bank.rek }}</span>
+                    </li>
+                    <li class="subtotal mt-3">
+                      Nama Penerima <span>{{ bank.reciever }}</span>
                     </li>
                   </ul>
-                  <router-link to="/success" class="proceed-btn">I ALREADY PAID</router-link>
+                  <router-link to="/success" class="proceed-btn"
+                    >I ALREADY PAID</router-link
+                  >
                 </div>
               </div>
             </div>
@@ -152,6 +156,75 @@ export default {
   name: "ShoppingCart",
   components: {
     HeaderSection,
+  },
+
+  data() {
+    return {
+
+      transactionId: "IYN" + this.getRandomInt(10000, 99999),
+      subtotal: 0,
+      pajak: 10,
+      totalBiaya: 0,
+      bank: { 
+        nama: 'Mandiri',
+        rek: '2208 1996 1403',
+        reciever: 'IYAN'
+      },
+      buyer: {
+        name: null,
+        email: null,
+        number: null,
+        address: null,
+      }
+    };
+  },
+
+  mounted() {
+    
+  },
+
+  methods: {
+    deleteItemKeranjang(item) {
+      this.$store.commit("deleteItem", item);
+    },
+
+    getRandomInt(min, max) { //Fungsi random integer
+      min = Math.ceil(min);
+      max = Math.floor(max);
+      return Math.floor(Math.random() * (max - min) + min); //The maximum is exclusive and the minimum is inclusive
+    },
+  },
+
+  watch: {
+    '$store.state.keranjang': { // WATCH GLOBAL STATE KERANJANG
+      handler: function () {
+        // SET STATE HARGA MENJADI 0
+        this.subtotal = 0; this.totalBiaya = 0;
+        this.$store.commit("setPrice", this.subtotal);
+        this.$store.commit("setTotal", this.totalBiaya);
+
+        // LOOP UNTUK MENGHITUNG ULANG TOTAL & PAJAK SETELAH ADA
+        // PERUBAHAN PADA STATE KERANJANG
+        let keranjang = this.$store.state.keranjang
+        if (keranjang.length > 0) {
+          for (let x in keranjang) {
+            // Hitung subtotal
+            this.subtotal += keranjang[x].price;
+            // Hitung pajak
+            this.totalBiaya += keranjang[x].price + (keranjang[x].price * this.pajak) / 100;
+          }
+          // HASIL KALKULASI DARI LOOP KEMBALI DITARUH DI GLOBAL STATE
+          this.$store.commit("setPrice", this.subtotal) 
+          this.$store.commit("setTotal", this.totalBiaya);
+          console.log(this.totalBiaya);
+        }
+        else {
+          this.$store.commit("setPrice", 0, 0)
+          this.transactionId = "";
+        }
+      },
+      deep: true,
+    },
   },
 };
 </script>

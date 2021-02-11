@@ -3,17 +3,17 @@
   <div class="related-products spad">
     <div class="container">
       <div class="row">
-        <div class="col-lg-12">
+        <div class="col-lg-8">
           <div class="section-title">
             <h2>Related Products</h2>
           </div>
         </div>
       </div>
-      <div class="row">
-        <div class="col-lg-3 col-sm-6">
+      <div class="row justify-content-md-center">
+        <div class="col-lg-2 col-sm-6">
           <div class="product-item">
             <div class="pi-pic">
-              <img src="img/products/women-1.jpg" alt="" />
+              <img src="/img/products/women-1.jpg" alt="" />
               <ul>
                 <li class="w-icon active">
                   <a href="#"><i class="icon_bag_alt"></i></a>
@@ -33,10 +33,10 @@
             </div>
           </div>
         </div>
-        <div class="col-lg-3 col-sm-6">
+        <div class="col-lg-2 col-sm-6">
           <div class="product-item">
             <div class="pi-pic">
-              <img src="img/products/women-2.jpg" alt="" />
+              <img src="/img/products/women-2.jpg" alt="" />
               <ul>
                 <li class="w-icon active">
                   <a href="#"><i class="icon_bag_alt"></i></a>
@@ -53,10 +53,10 @@
             </div>
           </div>
         </div>
-        <div class="col-lg-3 col-sm-6">
+        <div class="col-lg-2 col-sm-6">
           <div class="product-item">
             <div class="pi-pic">
-              <img src="img/products/women-3.jpg" alt="" />
+              <img src="/img/products/women-3.jpg" alt="" />
               <ul>
                 <li class="w-icon active">
                   <a href="#"><i class="icon_bag_alt"></i></a>
@@ -73,10 +73,10 @@
             </div>
           </div>
         </div>
-        <div class="col-lg-3 col-sm-6">
+        <div class="col-lg-2 col-sm-6">
           <div class="product-item">
             <div class="pi-pic">
-              <img src="img/products/women-4.jpg" alt="" />
+              <img src="/img/products/women-4.jpg" alt="" />
               <ul>
                 <li class="w-icon active">
                   <a href="#"><i class="icon_bag_alt"></i></a>
@@ -105,6 +105,6 @@ export default {
 }
 </script>
 
-<style lang="stylus" scoped>
+<style scoped>
 
 </style>
